@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title th:text="${room.name}"></title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+</head>
+<body>
+<header class="container">
+  <hgroup>
+    <h1>모두의 채팅방</h1>
+    <p>말하고 싶은 것들을 자유롭게 남겨 주세요.</p>
+  </hgroup>
+</header>
+<main class="container">
+  <section>
+    <h2 th:text="${room.name}"></h2>
+    <div id="msgArea"></div>
+    <input type="text" id="msg" placeholder="채팅을 입력해 주세요." aria-label="Text"
+           onkeyup="keyevent(event)"/>
+    <button type="button" onclick="send()">전송</button>
+  </section>
+</main>
+<footer class="container">
+  <small>Built with <a href="https://picocss.com">Pico</a></small>
+</footer>
+</body>
+<script th:inline="javascript">
+  const roomId = [[${room.roomId}]];
+
+  const username = prompt("이름을 입력해 주세요.");
+
+  const sockJs = new SockJS("/stomp/chat");
+  const stomp = Stomp.over(sockJs);
+
+  stomp.connect({}, () => {
+    stomp.send('/pub/chat/enter', {}, JSON.stringify({roomId: roomId, writer: username}))
+
+    stomp.subscribe(`/sub/chat/room/${roomId}`, chat => {
+      const content = JSON.parse(chat.body);
+
+      const writer = content.writer;
+      const message = content.message;
+      const str = `<div><b>${writer} : ${message}</b></div>`;
+      document.getElementById('msgArea').innerHTML += str;
+    });
+  });
+
+  const send = () => {
+    const message = document.getElementById('msg');
+    if (message.value === '') return;
+    stomp.send('/pub/chat/message', {}, JSON.stringify({roomId: roomId, writer: username, message: message.value}));
+    message.value = '';
+  }
+
+  const keyevent = (e) => {
+    if (e.keyCode === 13) {
+      send();
+    }
+  }
+</script>
+</html>

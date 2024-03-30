@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>채팅방 목록</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css"/>
+</head>
+<body>
+<header class="container">
+  <hgroup>
+    <h1>모두의 채팅방</h1>
+    <p>말하고 싶은 것들을 자유롭게 남겨 주세요.</p>
+  </hgroup>
+</header>
+<main class="container">
+  <section id="tables">
+    <h2>채팅방 목록</h2>
+    <div class="overflow-auto">
+      <table class="striped">
+        <thead>
+        <tr>
+          <th scope="col">#</th>
+          <th scope="col">채팅방 이름</th>
+          <th scope="col">입장</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="room : ${rooms}">
+          <th scope="row" th:text="${roomStat.index + 1}"></th>
+          <td th:text="${room.name}"></td>
+          <td><a th:href="${'/chat/room/' + room.roomId}">입장하기</a></td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</main>
+<footer class="container">
+  <small>Built with <a href="https://picocss.com">Pico</a></small>
+</footer>
+</body>
+</html>
